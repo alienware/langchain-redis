@@ -151,7 +151,7 @@ class RedisChatMessageHistory(BaseChatMessageHistory):
         Args:
             message (BaseMessage): The message to add to the history. This should be an
                                    instance of a class derived from BaseMessage, such as
-                                   HumanMessage, AIMessage, or SystemMessage.
+                                   HumanMessage, AIMessage, ToolMessage, or SystemMessage.
 
         Returns:
             None
@@ -205,6 +205,8 @@ class RedisChatMessageHistory(BaseChatMessageHistory):
             "session_id": self.session_id,
             "timestamp": datetime.now().timestamp(),
         }
+        if message.type == "tool":
+            data_to_store["data"]["tool_call_id"] = message.tool_call_id
 
         key = f"{self.key_prefix}{self.session_id}:{data_to_store['timestamp']}"
         self.redis_client.json().set(key, Path.root_path(), data_to_store)
